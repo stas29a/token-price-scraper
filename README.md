@@ -1,0 +1,1 @@
+To start app run ```docker compose up``` and open the browser at http://localhost:8080

@@ -1,0 +1,99 @@
+<html>
+<body>
+<div style="display: block;width: 100%;">
+    <canvas id="btc_prices"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    var labels = [];
+    var prices = [];
+    var labels_count = 60;
+    var priceChart = new Chart(document.getElementById('btc_prices'), {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: []
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: false
+                }
+            }
+        }
+    });
+
+    let ws = new WebSocket("ws://" + window.location.host + "/ws/prices");
+
+    priceChart.data = {
+        labels: labels,
+        datasets: [
+            {
+                label: 'BTC price',
+                data: prices,
+                borderColor: "green",
+                backgroundColor: "green",
+            },
+        ]
+    };
+
+    fetch("http://localhost:8080/api/v1/prices")
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(row => {
+                if (row['symbol'] !== 'Bitcoin') {
+                    console.log("Received data for symbol other than BTC", row);
+                    return;
+                }
+                labels.push(new Date(row['timestamp']).toLocaleTimeString());
+                prices.push(row['price']);
+            });
+            priceChart.update();
+        })
+        .catch(error => console.error('Error fetching initial prices:', error));
+
+    ws.onerror = (err => {
+        console.log("WebSocket error, trying to reconnect", err);
+        ws = new WebSocket("ws://" + window.location.host + "/ws/prices");
+        ws.onmessage = ws_handler;
+    });
+
+    ws.onclose = (event => {
+        console.log("WebSocket closed, trying to reconnect", event);
+        ws = new WebSocket("ws://" + window.location.host + "/ws/prices");
+        ws.onmessage = ws_handler;
+    });
+
+    let ws_handler = (event => {
+        let row = JSON.parse(event.data);
+
+        if (row['price'] === undefined) {
+            console.log("Received data without price", row);
+            return;
+        }
+
+        if (row['symbol'] !== 'Bitcoin') {
+            console.log("Received data for symbol other than BTC", row);
+            return;
+        }
+
+        if (labels.length >= labels_count) {
+            labels.shift();
+            prices.shift();
+        }
+
+        labels.push(new Date(row['timestamp']).toLocaleTimeString());
+        prices.push(row['price']);
+    });
+
+    ws.onmessage = ws_handler;
+
+    setInterval(() => {
+        priceChart.update('none');
+    }, 500);
+
+</script>
+</body>
+</html>
