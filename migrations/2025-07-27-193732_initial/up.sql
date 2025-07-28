@@ -5,3 +5,5 @@ create table prices
     price  numeric(16,10) not null ,
     created_at timestamp not null
 );
+
+CREATE INDEX prices_timestamp_indexx ON prices (created_at DESC NULLS LAST);
