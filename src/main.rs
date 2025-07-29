@@ -28,8 +28,8 @@ async fn main() -> anyhow::Result<()> {
     let config_path = std::env::var("CONFIG_PATH").unwrap_or_else(|_| "config.toml".to_string());
     let config = config::Config::from_file(std::path::Path::new(&config_path))?;
     let scraper = GeckoScraper::new(
-        "https://api.coingecko.com".to_string(),
         config.gecko_api_url.clone(),
+        config.gecko_api_key.clone(),
     );
 
     let manager = ConnectionManager::<PgConnection>::new(config.database_url.clone());

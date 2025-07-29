@@ -4,19 +4,8 @@ use crate::persistence::{PriceRepository, TokenPriceModel};
 use crate::scraper::{Scraper, Token};
 use crate::web::run_web_server;
 use log::{debug, error, info};
-use std::fs;
-use std::path::Path;
 use std::sync::Arc;
 use tokio_util::sync::CancellationToken;
-
-impl Config {
-    pub fn from_file(path: &Path) -> anyhow::Result<Self> {
-        let toml_str = fs::read_to_string(path)?;
-        let config = toml::from_str(&toml_str)?;
-
-        Ok(config)
-    }
-}
 
 pub struct App<S: Scraper, P: PriceRepository> {
     config: Config,
@@ -100,6 +89,7 @@ mod tests {
     use async_trait::async_trait;
     use bigdecimal::{BigDecimal, FromPrimitive};
     use std::sync::Arc;
+    use std::time::UNIX_EPOCH;
     use tokio::sync::Mutex;
     use tokio_util::sync::CancellationToken;
     use tracing_unwrap::{OptionExt, ResultExt};
@@ -163,8 +153,8 @@ mod tests {
     async fn test_run_price_fetch_and_save() {
         let config = Config {
             get_price_duration_sec: 1,
-            gecko_url: "".to_string(),
             gecko_api_url: "".to_string(),
+            gecko_api_key: "".to_string(),
             host: "127.0.0.1".to_string(),
             port: 0,
             database_url: "".to_string(),

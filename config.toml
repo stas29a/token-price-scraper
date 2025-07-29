@@ -1,6 +1,6 @@
 host="0.0.0.0"
 port=8080
-gecko_url="https://api.coingecko.com"
 get_price_duration_sec=5
-gecko_api_url="CG-fwFym4Js1XJvGdPPXkVVBQXA"
+gecko_api_key="CG-fwFym4Js1XJvGdPPXkVVBQXA"
+gecko_api_url="https://api.coingecko.com"
 database_url="postgres://user:password@db:5432/demo"
